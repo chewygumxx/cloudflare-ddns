@@ -31,19 +31,28 @@ API_TOKEN="$(pass-cli item view "$API_TOKEN_URI")"
 : "${TTL:=1200}"
 : "${PROXIED:=false}"
 
-api_call() {
-    curl https://api.cloudflare.com/client/v4"$1" \
+__curl() {
+    command curl \
         --silent \
         --retry 3 \
         --retry-delay 2 \
         --show-error \
         --fail-with-body \
+        "$@"
+}
+
+__api_call() {
+    if [[ "$1" == .* ]]; then
+        local jq_filter="$1"
+        shift
+    fi
+    __curl "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
         -H "Authorization: Bearer $API_TOKEN" \
         -H "Content-Type: application/json" \
-        "${@:3}" |
+        "$@" |
     jq -er "
         if   .success
-        then .result$2
+        then .result${jq_filter-}
         else error( ([.errors[]?.message] | join(\"; \") | select(length > 0)) // \"unknown error\" )
         end
     "
@@ -54,8 +63,8 @@ api_call() {
 # Validate Sync
 # --------------
 
-current_ip="$(api_call "/radar/entities/ip" ".ip.ip" --ipv4)"
-dns_ip="$(api_call "/zones/${ZONE_ID}/dns_records/${RECORD_ID}" ".content")"
+current_ip="$(__curl --ipv4 "https://cloudflare.com/cdn-cgi/trace" | awk -F= '/^ip=/{print $2}')"
+dns_ip="$(__api_call .content)"
 if [[ "$current_ip" == "$dns_ip" ]]; then
     (( DEBUG )) && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"
     exit 0
@@ -68,8 +77,6 @@ printf "[INFO] %s\n" "Current IP does not match DNS IP" \
 # -----------
 # Update DNS
 # -----------
-
-empty_arg="" # For 2nd arg of final api_call 
 
 jq -n \
     --arg     name    "$RECORD_NAME" \
@@ -85,4 +92,4 @@ jq -n \
         ttl:     $ttl,
         proxied: $proxied
     }' |
-api_call "/zones/${ZONE_ID}/dns_records/${RECORD_ID}" "$empty_arg" -X PATCH --data-binary @-
+__api_call -X PATCH --data-binary @-
