@@ -13,12 +13,12 @@
 set -euo pipefail
 : "${DEBUG:=0}"
 
-if [[ $# -ne 1 ]]; then
+if [[ $# -ne 1 || -z "$1" ]]; then
     printf 'usage: %s <profile>\n' "$0" >&2
     exit 2
 fi
-if [[ $1 == *[^[a-zA-Z0-9]_.-]* || -z $1 ]]; then
-    printf '%s: Invalid profile name\n' "$1" >&2
+if [[ "$1" == *[^a-zA-Z0-9_.-]* ]]; then
+    printf 'Invalid profile name: %s\n' "$1" >&2
     exit 2
 fi
 
@@ -50,7 +50,7 @@ __api_call() {
         -H "Authorization: Bearer $API_TOKEN" \
         -H "Content-Type: application/json" \
         "$@" |
-    jq -er "
+    jq --indent 4 -er "
         if   .success
         then .result${jq_filter-}
         else error( ([.errors[]?.message] | join(\"; \") | select(length > 0)) // \"unknown error\" )
@@ -91,5 +91,4 @@ jq -n \
         comment: $comment,
         ttl:     $ttl,
         proxied: $proxied
-    }' |
-__api_call -X PATCH --data-binary @-
+    }' | __api_call -X PATCH --data-binary @-
