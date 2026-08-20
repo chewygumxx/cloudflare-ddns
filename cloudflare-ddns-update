@@ -11,15 +11,16 @@
 
 set -euo pipefail
 
+: ${DEBUG:=0}
 source "${XDG_CONFIG_HOME:-$HOME/.config}/cloudflare-ddns/${1:?No argument provided}.env"
 
 API_TOKEN="$(pass-cli item view "$API_TOKEN")"
 
-current_ip="$(curl --silent --show-error --fail \
+current_ip="$(curl --silent --show-error --fail --retry 3 --retry-delay 2 \
     "https://cloudflare.com/cdn-cgi/trace" \
     | awk -F= '/^ip=/{print $2}')"
 
-dns_ip="$(curl --silent --show-error --fail \
+dns_ip="$(curl --silent --show-error --fail --retry 3 --retry-delay 2 \
     "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
     -H "Authorization: Bearer $API_TOKEN" \
     | jq -r '.result.content')"
@@ -33,7 +34,7 @@ print "[INFO] Current IP does not match DNS IP"
 print "[INFO] Current IP: $current_ip"
 print "[INFO] DNS IP: $dns_ip"
 
-curl --silent --show-error --fail \
+curl --silent --show-error --fail --retry 3 --retry-delay 2 \
     "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
     -X PATCH \
     -H "Authorization: Bearer $API_TOKEN" \
