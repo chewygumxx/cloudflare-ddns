@@ -1,4 +1,4 @@
-# vim:set expandtab:shiftwidth=4:filetype=systemd:
+# vim: expandtab shiftwidth=4 filetype=systemd:
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # 
@@ -9,11 +9,10 @@
 # 
 
 [Unit]
-Description=Update Cloudflare A record with current public IP
+Description=Cloudflare DDNS Synchronisation
 
 [Service]
 Type=oneshot
 ExecStart=%h/.local/bin/cloudflare-ddns-update "%i"
 Restart=on-failure
 RestartSec=30
-NoNewPrivileges=true
