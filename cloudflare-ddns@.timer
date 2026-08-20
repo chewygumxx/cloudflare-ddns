@@ -1,0 +1,21 @@
+# vim:set expandtab:shiftwidth=4:filetype=systemd:
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# 
+# 
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/cloudflare-ddns@.timer
+# 
+# 
+
+[Unit]
+Description=Run cloudflare-ddns periodically
+
+[Timer]
+Persistent=true
+OnBootSec=2min
+OnUnitActiveSec=15min
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

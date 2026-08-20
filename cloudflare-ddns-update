@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+# vim:set expandtab:shiftwidth=4:filetype=zsh:
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# 
+# 
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/cloudflare-ddns-update
+# 
+# 
+
+set -euo pipefail
+
+source "${XDG_CONFIG_HOME:-$HOME/.config}/cloudflare-ddns/${1:?No argument provided}.env"
+
+API_TOKEN="$(pass-cli item view "$API_TOKEN")"
+
+current_ip="$(curl --silent --show-error --fail \
+    "https://cloudflare.com/cdn-cgi/trace" \
+    | awk -F= '/^ip=/{print $2}')"
+
+dns_ip="$(curl --silent --show-error --fail \
+    "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
+    -H "Authorization: Bearer $API_TOKEN" \
+    | jq -r '.result.content')"
+
+if [[ "$current_ip" == "$dns_ip" ]]; then
+    (( DEBUG )) && print "[DEBUG] Current IP matches DNS IP: $current_ip"
+    exit 0
+fi
+
+print "[INFO] Current IP does not match DNS IP"
+print "[INFO] Current IP: $current_ip"
+print "[INFO] DNS IP: $dns_ip"
+
+curl --silent --show-error --fail \
+    "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
+    -X PATCH \
+    -H "Authorization: Bearer $API_TOKEN" \
+    -H "Content-Type: application/json" \
+    --data "$(jo \
+        name="$RECORD_NAME" \
+        ttl=1 \
+        type="A" \
+        comment="${(%):-%N}" \
+        content="$current_ip" \
+    )" \
+     | jq '.result | with_entries(select(.value != {} and .value != []))'

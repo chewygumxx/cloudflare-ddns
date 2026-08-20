@@ -1,0 +1,19 @@
+# vim:set expandtab:shiftwidth=4:filetype=systemd:
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# 
+# 
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/cloudflare-ddns@.service
+# 
+# 
+
+[Unit]
+Description=Update Cloudflare A record with current public IP
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/cloudflare-ddns-update "%i"
+Restart=on-failure
+RestartSec=30
+NoNewPrivileges=true
