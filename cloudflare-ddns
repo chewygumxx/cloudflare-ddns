@@ -46,7 +46,7 @@ source "${ENVPATH:?ENVPATH is not set}"
 : "${ZONE_ID:?ZONE_ID is not set}"
 : "${RECORD_NAME:?RECORD_NAME is not set}"
 : "${RECORD_ID:?RECORD_ID is not set}"
-: "${TTL:=1200}"
+: "${TTL:=300}"
 : "${PROXIED:=false}"
 
 # --------------
