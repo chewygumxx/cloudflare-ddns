@@ -18,6 +18,7 @@ __curl() {
         --silent \
         --retry 3 \
         --retry-delay 2 \
+        --retry-all-errors \
         --show-error \
         --fail-with-body \
         "$@"
