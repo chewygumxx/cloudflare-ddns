@@ -14,11 +14,11 @@ set -euo pipefail
 : "${DEBUG:=0}"
 
 if [[ $# -ne 1 || -z "$1" ]]; then
-    printf 'usage: %s <domain>\n' "$0" >&2
+    printf 'usage: %s <profile>\n' "$0" >&2
     exit 2
 fi
 if [[ "$1" == *[^a-zA-Z0-9_.-]* ]]; then
-    printf 'Invalid domain name: %s\n' "$1" >&2
+    printf 'Invalid profile: %s\n' "$1" >&2
     exit 2
 fi
 
