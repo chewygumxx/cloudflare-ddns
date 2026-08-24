@@ -104,15 +104,15 @@ chmod 600 "$XDG_CONFIG_HOME/cloudflare-ddns/<name>"
 
 It should set the following as plain shell `KEY=value` assignments:
 
-| Variable      | Required | Default | Notes                                     |
-|---------------|----------|---------|--------------------------------------------|
-| `API_TOKEN`   | yes      | —       | Cloudflare token scoped to `Zone:DNS:Edit` for the zone |
-| `ZONE_ID`     | yes      | —       | Zone ID that owns the record |
-| `RECORD_NAME` | yes      | —       | Fully qualified record name, e.g. `home.example.com` |
-| `RECORD_ID`   | yes      | —       | ID of the *existing* `A` record to update |
-| `TTL`         | no       | `1200`  | Seconds; forced to `1` ("Automatic") by Cloudflare if `PROXIED=true` |
+| Variable      | Required | Default | Notes                                                                |
+|---------------|----------|---------|----------------------------------------------------------------------|
+| `API_TOKEN`   | yes      | —       | Cloudflare token scoped to `Zone:DNS:Edit` for the zone              |
+| `ZONE_ID`     | yes      | —       | Zone ID that owns the record                                         |
+| `RECORD_NAME` | yes      | —       | Fully qualified record name, e.g. `home.example.com`                 |
+| `RECORD_ID`   | yes      | —       | ID of the *existing* `A` record to update                            |
+| `TTL`         | no       | `300`   | Seconds; forced to `1` ("Automatic") by Cloudflare if `PROXIED=true` |
 | `PROXIED`     | no       | `false` | Literal `true`/`false` — parsed as JSON, not a general shell boolean |
-| `DEBUG`       | no       | `0`     | Set to `1` to log when the IP already matches |
+| `DEBUG`       | no       | `0`     | Set to `1` to log when the IP already matches                        |
 
 ### Getting the IDs and token
 
