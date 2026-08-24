@@ -13,14 +13,6 @@
 set -euo pipefail
 : "${DEBUG:=0}"
 
-source "$ENVPATH"
-: "${API_TOKEN:?API_TOKEN is not set}"
-: "${ZONE_ID:?ZONE_ID is not set}"
-: "${RECORD_ID:?RECORD_ID is not set}"
-: "${RECORD_NAME:?RECORD_NAME is not set}"
-: "${TTL:=1200}"
-: "${PROXIED:=false}"
-
 __curl() {
     command curl \
         --silent \
@@ -48,6 +40,13 @@ __api_call() {
     "
 }
 
+source "$ENVPATH"
+: "${API_TOKEN:?API_TOKEN is not set}"
+: "${ZONE_ID:?ZONE_ID is not set}"
+: "${RECORD_NAME:?RECORD_NAME is not set}"
+: "${RECORD_ID:?RECORD_ID is not set}"
+: "${TTL:=1200}"
+: "${PROXIED:=false}"
 
 # --------------
 # Validate Sync
