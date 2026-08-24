@@ -40,7 +40,7 @@ __api_call() {
     "
 }
 
-source "$ENVPATH"
+source "${ENVPATH:?ENVPATH is not set}"
 : "${API_TOKEN:?API_TOKEN is not set}"
 : "${ZONE_ID:?ZONE_ID is not set}"
 : "${RECORD_NAME:?RECORD_NAME is not set}"

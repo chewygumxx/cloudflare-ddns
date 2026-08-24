@@ -18,3 +18,19 @@ LoadCredential=env:%E/cloudflare-ddns/%i
 Environment=ENVPATH=%d/env
 Restart=on-failure
 RestartSec=30
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
