@@ -13,6 +13,6 @@ Description=Cloudflare DDNS Synchronisation
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/cloudflare-ddns-update "%i"
+ExecStart=%h/.local/bin/cloudflare-ddns "%i"
 Restart=on-failure
 RestartSec=30

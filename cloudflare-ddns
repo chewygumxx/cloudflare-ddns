@@ -22,7 +22,7 @@ if [[ "$1" == *[^a-zA-Z0-9_.-]* ]]; then
     exit 2
 fi
 
-source "${XDG_CONFIG_HOME:-$HOME/.config}/cloudflare-ddns/$1.env"
+source "${XDG_CONFIG_HOME:-$HOME/.config}/cloudflare-ddns/$1"
 : "${API_TOKEN:?API_TOKEN is not set}"
 : "${ZONE_ID:?ZONE_ID is not set}"
 : "${RECORD_ID:?RECORD_ID is not set}"
