@@ -13,6 +13,8 @@ Description=Cloudflare DDNS Synchronisation
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/cloudflare-ddns "%i"
+ExecStart=%h/.local/bin/cloudflare-ddns
+LoadCredential=env:%E/cloudflare-ddns/%i
+Environment=ENVPATH=%d/env
 Restart=on-failure
 RestartSec=30

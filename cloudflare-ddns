@@ -13,16 +13,7 @@
 set -euo pipefail
 : "${DEBUG:=0}"
 
-if [[ $# -ne 1 || -z "$1" ]]; then
-    printf 'usage: %s <profile>\n' "$0" >&2
-    exit 2
-fi
-if [[ "$1" == *[^a-zA-Z0-9_.-]* ]]; then
-    printf 'Invalid profile: %s\n' "$1" >&2
-    exit 2
-fi
-
-source "${XDG_CONFIG_HOME:-$HOME/.config}/cloudflare-ddns/$1"
+source "$ENVPATH"
 : "${API_TOKEN:?API_TOKEN is not set}"
 : "${ZONE_ID:?ZONE_ID is not set}"
 : "${RECORD_ID:?RECORD_ID is not set}"
