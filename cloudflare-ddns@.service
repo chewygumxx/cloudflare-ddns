@@ -1,4 +1,4 @@
-# vim: expandtab shiftwidth=4 filetype=systemd:
+# vim: expandtab shiftwidth=4 filetype=ini:
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # 
@@ -34,3 +34,13 @@ MemoryDenyWriteExecute=true
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 SystemCallFilter=@system-service
 SystemCallArchitectures=native
+CapabilityBoundingSet=
+RestrictSUIDSGID=true
+ProtectHostname=true
+RestrictRealtime=true
+PrivateDevices=true
+ProtectProc=invisible
+ProcSubset=pid
+KeyringMode=private
+UMask=0077
+SystemCallFilter=~@privileged @resources
