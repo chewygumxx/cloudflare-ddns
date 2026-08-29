@@ -1,0 +1,27 @@
+// vim:set expandtab shiftwidth=4 filetype=jsonc:
+// SPDX-License-Identifier: GPL-3.0-only
+
+//
+//
+// ~chewygumxx/cloudflare-ddns.git
+// ::: :/.repo-metadata.jsonc
+//
+//
+
+{
+    "$schema": "https://raw.githubusercontent.com/chewygumxx/apply-repo-metadata-jsonc/refs/tags/v2/schema.json",
+    "name":  "cloudflare-ddns",
+    "owner": "chewygumxx",
+    "slug":  "chewygumxx/cloudflare-ddns",
+    "default_branch": "main",
+    "description": "Dynamic DNS implementation for Cloudflare with systemd, jq, curl, and bash.",
+    "category": "systemd-service",
+    "topics": [ "systemd-service", "systemd-user-service", "cloudflare", "ddns", "cloudflare-ddns" ],
+    "language": "bash",
+    "license": {
+        "filepath":  "./LICENSE",
+        "spdx_id":   "GPL-3.0-only",
+        "full_name": "GNU General Public License v3.0 only",
+        "url":       "https://spdx.org/licenses/GPL-3.0-only"
+    }
+}
