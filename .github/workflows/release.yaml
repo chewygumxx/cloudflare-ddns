@@ -1,0 +1,72 @@
+# vim:set expandtab shiftwidth=2 filetype=yaml foldlevel=3:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.github/workflows/release.yaml
+#
+#
+
+# On a version tag, runs `mise run check` and publishes the script, its units
+# and the files to install them with as a GitHub release.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_ASSETS: >-
+    README.md
+    LICENSE
+    Makefile
+    cloudflare-ddns
+    cloudflare-ddns@.service
+    cloudflare-ddns@.timer
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup mise
+        uses: jdx/mise-action@v4
+
+      - name: Check
+        run: mise run check
+
+  release:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Create Archive
+        env:
+          ARCHIVE: cloudflare-ddns-${{ github.ref_name }}.tar.gz
+        run: |
+          # shellcheck disable=SC2086
+          tar -czf "$ARCHIVE" $RELEASE_ASSETS
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: cloudflare-ddns-${{ github.ref_name }}.tar.gz
