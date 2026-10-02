@@ -56,7 +56,7 @@ source "${ENVPATH:?ENVPATH is not set}"
 current_ip="$(__curl --ipv4 "https://cloudflare.com/cdn-cgi/trace" | awk -F= '/^ip=/{print $2}')"
 dns_ip="$(__api_call .content)"
 if [[ "$current_ip" == "$dns_ip" ]]; then
-    ((DEBUG)) && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"
+    [[ "$DEBUG" != 0 ]] && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"
     exit 0
 fi
 
