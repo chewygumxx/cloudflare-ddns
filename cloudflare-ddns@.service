@@ -1,12 +1,12 @@
 # vim: expandtab shiftwidth=4 filetype=systemd:
 # SPDX-License-Identifier: GPL-3.0-only
 
-# 
-# 
+#
+#
 # ~chewygumxx/cloudflare-ddns.git
 # ::: :/cloudflare-ddns@.service
-# 
-# 
+#
+#
 
 [Unit]
 Description=Cloudflare DDNS Synchronisation
