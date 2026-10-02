@@ -43,6 +43,11 @@ __api_call() {
     "
 }
 
+__fail() {
+    printf "[ERROR] %s\n" "$@" >&2
+    exit 1
+}
+
 source "${ENVPATH:?ENVPATH is not set}"
 : "${API_TOKEN:?API_TOKEN is not set}"
 : "${ZONE_ID:?ZONE_ID is not set}"
@@ -50,12 +55,16 @@ source "${ENVPATH:?ENVPATH is not set}"
 : "${RECORD_ID:?RECORD_ID is not set}"
 : "${TTL:=300}"
 : "${PROXIED:=false}"
+[[ "$TTL" =~ ^[0-9]+$ ]] || __fail "TTL must be a whole number of seconds: $TTL"
+[[ "$PROXIED" == true || "$PROXIED" == false ]] || __fail "PROXIED must be true or false: $PROXIED"
 
 # --------------
 # Validate Sync
 # --------------
 
 current_ip="$(__curl --ipv4 "https://cloudflare.com/cdn-cgi/trace" | awk -F= '/^ip=/{print $2}')"
+[[ "$current_ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] ||
+    __fail "Could not resolve the public IPv4 address: '$current_ip'"
 dns_ip="$(__api_call .content)"
 if [[ "$current_ip" == "$dns_ip" ]]; then
     [[ "$DEBUG" != 0 ]] && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"

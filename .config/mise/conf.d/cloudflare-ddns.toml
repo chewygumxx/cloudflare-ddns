@@ -49,7 +49,7 @@ git ls-files -z -- '*.service' '*.timer' | HOME=$tmp xargs -0 -r systemd-analyze
 """
 
 [tasks."test:script"]
-description = "The script refuses to run without its configuration"
+description = "The script refuses to run without a valid configuration"
 # Each case fails before the script reaches the network, so no token is needed.
 run         = """
 fail() { echo "$1" >&2; exit 1; }
@@ -57,6 +57,14 @@ out=$(env -u ENVPATH ./cloudflare-ddns 2>&1) && fail "ran without ENVPATH"
 case $out in *"ENVPATH is not set"*) ;; *) fail "unexpected: $out" ;; esac
 out=$(ENVPATH=/dev/null ./cloudflare-ddns 2>&1) && fail "ran without API_TOKEN"
 case $out in *"API_TOKEN is not set"*) ;; *) fail "unexpected: $out" ;; esac
+env=$(mktemp)
+trap 'rm -f "$env"' EXIT
+printf '%s\n' API_TOKEN=x ZONE_ID=x RECORD_NAME=x RECORD_ID=x TTL=5m >"$env"
+out=$(ENVPATH=$env ./cloudflare-ddns 2>&1) && fail "ran with a bad TTL"
+case $out in *"TTL must be a whole number"*) ;; *) fail "unexpected: $out" ;; esac
+printf '%s\n' API_TOKEN=x ZONE_ID=x RECORD_NAME=x RECORD_ID=x PROXIED=yes >"$env"
+out=$(ENVPATH=$env ./cloudflare-ddns 2>&1) && fail "ran with a bad PROXIED"
+case $out in *"PROXIED must be true or false"*) ;; *) fail "unexpected: $out" ;; esac
 echo "ok   test:script"
 """
 
