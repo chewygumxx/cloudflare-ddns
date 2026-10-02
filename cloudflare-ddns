@@ -35,7 +35,7 @@ __api_call() {
         "$@" |
         jq --indent 4 -er "
         if   .success
-        then .result${jq_filter-}
+        then .result${jq_filter-} // error(\"result field is null or missing\")
         else error( ([.errors[]?.message] | join(\"; \") | select(length > 0)) // \"unknown error\" )
         end
     "
