@@ -30,7 +30,7 @@ __api_call() {
         shift
     fi
     __curl "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" \
-        -H "Authorization: Bearer $API_TOKEN" \
+        -H @<(printf "%s\n" "Authorization: Bearer $API_TOKEN") \
         -H "Content-Type: application/json" \
         "$@" |
         jq --indent 4 -er "
