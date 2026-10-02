@@ -47,10 +47,11 @@ running in the background.
 4. Otherwise, `PATCH` the record with the new `content`, the configured
    `ttl` and `proxied` state, and a `comment` naming the script, so the
    record's edit history in the dashboard shows what last touched it.
-5. If any step fails outright (a bad token, a stale record ID, a
-   network hiccup), the script exits non-zero. The service unit's
-   `Restart=on-failure` / `RestartSec=30` retries automatically rather
-   than waiting for the next scheduled tick.
+5. curl retries transient failures (timeouts, refused connections, HTTP
+   `408`, `429` and `5xx`) itself. If any step still fails (a bad token, a
+   stale record ID, a network outage), the script exits non-zero, and the
+   service unit's `Restart=on-failure` retries it, starting after 30
+   seconds and backing off to 15 minutes, the timer's own interval.
 
 The script only ever _updates_ an existing record; it never creates one,
 and it manages a single `A` record per instance (see

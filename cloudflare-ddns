@@ -20,7 +20,7 @@ __curl() {
         --max-time 30 \
         --retry 3 \
         --retry-delay 2 \
-        --retry-all-errors \
+        --retry-connrefused \
         --show-error \
         --fail-with-body \
         "$@"

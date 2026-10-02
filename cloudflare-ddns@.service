@@ -18,6 +18,8 @@ LoadCredential=env:%E/cloudflare-ddns/%i
 Environment=ENVPATH=%d/env
 Restart=on-failure
 RestartSec=30
+RestartSteps=5
+RestartMaxDelaySec=15min
 TimeoutStartSec=5min
 NoNewPrivileges=true
 ProtectSystem=strict
