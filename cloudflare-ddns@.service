@@ -9,7 +9,7 @@
 #
 
 [Unit]
-Description=Cloudflare DDNS Synchronisation
+Description=Cloudflare DDNS synchronisation for %i
 
 [Service]
 Type=oneshot

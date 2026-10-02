@@ -9,7 +9,7 @@
 #
 
 [Unit]
-Description=Run cloudflare-ddns periodically
+Description=Run cloudflare-ddns periodically for %i
 
 [Timer]
 OnBootSec=2min
