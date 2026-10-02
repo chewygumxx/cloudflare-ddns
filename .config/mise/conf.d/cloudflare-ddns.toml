@@ -48,6 +48,18 @@ install -Dm755 cloudflare-ddns "$tmp/.local/bin/cloudflare-ddns"
 git ls-files -z -- '*.service' '*.timer' | HOME=$tmp xargs -0 -r systemd-analyze --recursive-errors=no --man=no verify --
 """
 
+[tasks."test:script"]
+description = "The script refuses to run without its configuration"
+# Each case fails before the script reaches the network, so no token is needed.
+run         = """
+fail() { echo "$1" >&2; exit 1; }
+out=$(env -u ENVPATH ./cloudflare-ddns 2>&1) && fail "ran without ENVPATH"
+case $out in *"ENVPATH is not set"*) ;; *) fail "unexpected: $out" ;; esac
+out=$(ENVPATH=/dev/null ./cloudflare-ddns 2>&1) && fail "ran without API_TOKEN"
+case $out in *"API_TOKEN is not set"*) ;; *) fail "unexpected: $out" ;; esac
+echo "ok   test:script"
+"""
+
 [tasks."lint:editorconfig"]
 description = "Every file against `.editorconfig`, except indent size, as CI checks"
 run         = "editorconfig-checker -disable-indent-size"
