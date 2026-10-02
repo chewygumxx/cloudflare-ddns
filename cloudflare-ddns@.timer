@@ -12,7 +12,6 @@
 Description=Run cloudflare-ddns periodically
 
 [Timer]
-Persistent=true
 OnBootSec=2min
 OnUnitActiveSec=15min
 RandomizedDelaySec=30

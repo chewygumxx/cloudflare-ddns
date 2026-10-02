@@ -162,8 +162,9 @@ stops and disables the timer.
 you enable the timer. On an ordinary desktop login that point is
 already in the past, so the first run fires immediately. From there,
 `OnUnitActiveSec=15min` takes over, repeating every 15 minutes (±30s of
-jitter) after each run, and `Persistent=true` means a run missed while
-the machine was off or asleep fires once at the next opportunity.
+jitter) after each run. These are monotonic timers, so time spent asleep
+doesn't count toward the 15 minutes, and a reboot starts the schedule
+again from `OnBootSec=`.
 
 If this runs on a machine you're not always logged into, enable lingering
 so the user manager, and its timers, keep running without an active
