@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# vim:set expandtab shiftwidth=4 filetype=sh:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.githooks/commit-msg
+#
+#
+
+# The messages git and GitHub write, which the shared commitlint configuration
+# ignores by default: a merge, a revert and an autosquash commit.
+case $(head -n 1 "$1") in
+"Merge "* | "Revert "* | "revert "* | "amend!"* | "fixup!"* | "squash!"*) exit 0 ;;
+esac
+
+exec mise exec -- committed --commit-file "$1"

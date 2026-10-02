@@ -1,0 +1,147 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+#:schema https://mise.jdx.dev/schema/mise.json
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/mise.toml
+#
+#
+
+#
+# https://mise.jdx.dev/configuration.html
+#
+# The development toolchain and the tasks for this repository, in one place.
+#
+# Everything the repository runs is pinned here, so a checkout never depends
+# on whatever the contributor happens to have on `PATH`; there is no
+# `package.json`. CI installs from this file via `jdx/mise-action`, so the
+# versions below are the ones CI runs.
+#
+# The tasks below are aggregates. The language's own tools and tasks are
+# added beside this file in `.config/mise/conf.d/`, which mise merges in, and
+# each task is named for the aggregate it joins: `lint:*`, `test:*`,
+# `format:*` and `pre-commit:*`.
+#
+# Backends are named explicitly rather than relying on the registry alias,
+# so the resolution is visible here and cannot change underneath the pin.
+#
+
+min_version = "2026.9.0"
+
+[tools]
+#
+# Utilities
+#
+# `jq` parses the tool payload in `.claude/hooks/prohibit-em-dash.sh`.
+#
+"aqua:jqlang/jq" = "1.8.2"
+
+#
+# Commit messages
+#
+# committed lints them against `committed.toml`.
+#
+"aqua:crate-ci/committed" = "1.1.11"
+
+#
+# Formatting and lint
+#
+# Biome reads `.biome.json`, rumdl `.rumdl.toml` and yamlfmt `.yamlfmt.yaml`.
+# yamllint is a Python tool, installed with the uv pinned beside it; its rules
+# come from `.yamllint.yaml`.
+#
+"aqua:astral-sh/uv"   = "0.12.19"
+"aqua:biomejs/biome"  = "2.5.14"
+"aqua:google/yamlfmt" = "0.21.0"
+"aqua:rvben/rumdl"    = "0.2.78"
+"pypi:yamllint"       = "1.38.0"
+
+# Wires the git hooks in `.githooks/`, as husky's `prepare` does for a Bun
+# repository, whenever `mise install` runs: by a contributor, or by CI.
+[hooks]
+postinstall = "git config core.hooksPath .githooks"
+
+#
+# Lint
+#
+
+[tasks."lint:biome"]
+description = "Biome's format and lint checks"
+run         = "biome ci ."
+
+[tasks."lint:md"]
+description = "Markdown lint"
+run         = "git ls-files -z '*.md' | xargs -0 -r rumdl check"
+
+[tasks."lint:yaml"]
+description = "YAML format (yamlfmt) and lint (yamllint)"
+run         = """
+git ls-files -z '*.yaml' '*.yml' | xargs -0 -r yamlfmt -lint
+git ls-files -z '*.yaml' '*.yml' | xargs -0 -r yamllint --strict
+"""
+
+[tasks."lint:emdash"]
+description = "Reject em dashes (U+2014)"
+# mise runs a task with errexit, so a match ends it, and no match (status 1)
+# is the pass.
+run         = "git grep -nIP --untracked '\\x{2014}' && exit 1 || test $? -eq 1"
+
+#
+# Format
+#
+
+[tasks."format:biome"]
+description = "Apply Biome formatting"
+run         = "biome format --write ."
+
+[tasks."format:yaml"]
+description = "Apply yamlfmt formatting"
+run         = "git ls-files -z '*.yaml' '*.yml' | xargs -0 -r yamlfmt"
+
+#
+# Pre-commit: the same checks on staged files
+#
+
+[tasks."pre-commit:biome"]
+description = "Biome's checks on staged files"
+run         = "biome check --staged --no-errors-on-unmatched"
+
+[tasks."pre-commit:md"]
+description = "Markdown lint on staged files"
+run         = "git diff -z --cached --name-only --diff-filter=ACMR -- '*.md' | xargs -0 -r rumdl check"
+
+[tasks."pre-commit:yaml"]
+description = "YAML format and lint on staged files"
+run         = """
+git diff -z --cached --name-only --diff-filter=ACMR -- '*.yaml' '*.yml' | xargs -0 -r yamlfmt -lint
+git diff -z --cached --name-only --diff-filter=ACMR -- '*.yaml' '*.yml' | xargs -0 -r yamllint --strict
+"""
+
+[tasks."pre-commit:emdash"]
+description = "Reject em dashes in staged changes"
+# U+2014 as UTF-8 bytes, so this file does not trip its own check.
+run         = """
+emdash=$(printf '\\342\\200\\224')
+if git diff --cached -U0 | grep '^+' | grep -q "$emdash"; then
+    echo "Em dash (U+2014) in staged changes; em dashes are prohibited." >&2
+    exit 1
+fi
+"""
+
+#
+# The aggregates
+#
+
+[tasks.check]
+description = "Every check CI runs"
+depends     = [ "lint:*", "test:*" ]
+
+[tasks.format]
+description = "Apply every formatter"
+depends     = [ "format:*" ]
+
+[tasks.pre-commit]
+description = "The checks the pre-commit hook runs"
+depends     = [ "pre-commit:*" ]

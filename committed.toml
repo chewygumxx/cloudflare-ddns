@@ -1,0 +1,55 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+#:schema https://raw.githubusercontent.com/crate-ci/committed/master/config.schema.json
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/committed.toml
+#
+#
+
+# https://github.com/crate-ci/committed
+#
+# The house rules of `@chewygumxx/commitlint-config`, as far as committed
+# states them: the same twelve types, and the scopes named in
+# `allowed_scopes`, which are this repository's own.
+#
+# What committed cannot state, and commitlint does: a header is held to 72
+# characters, not 50 (`subject_length` has no effect in committed 1.1), `a/b`
+# cannot name two scopes, and a subject's case is not checked.
+
+style = "conventional"
+
+allowed_types = [
+    "feat",
+    "fix",
+    "tweak",
+    "chore",
+    "style",
+    "docs",
+    "ci",
+    "refactor",
+    "perf",
+    "build",
+    "test",
+    "revert",
+]
+
+# This repository's own scopes, each with its full name.
+allowed_scopes = [
+    # Claude Code assets ie. hooks, skills, agents, etc.
+    "claude",
+]
+
+# A body line, and the header, at most 72 characters.
+hard_line_length = 72
+line_length      = 72
+
+subject_not_punctuated = true
+
+# commitlint does not reject what these would.
+imperative_subject  = false
+subject_capitalized = false
+no_fixup            = false
+no_wip              = false

@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# vim:set expandtab shiftwidth=4 filetype=sh:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.githooks/pre-commit
+#
+#
+
+# Through mise, so the hook runs the pinned tools, not the contributor's PATH.
+exec mise run pre-commit

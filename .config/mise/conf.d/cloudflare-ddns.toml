@@ -1,0 +1,71 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+#:schema https://mise.jdx.dev/schema/mise.json
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.config/mise/conf.d/cloudflare-ddns.toml
+#
+#
+
+#
+# https://mise.jdx.dev/configuration.html
+#
+# The script's and the units' tools and tasks, merged into `mise.toml`'s
+# aggregates: mise reads every file in this directory beside it.
+#
+# The shell tools are pinned as `chewygumxx/.github`'s `actions/mise.toml`
+# pins them, so `mise run check` lints as the shared CI does. systemd itself
+# is not installed by mise: `systemd-analyze` comes with the system, as it
+# does on CI's Ubuntu runner.
+#
+# shfmt picks the shell scripts out of the files named to it, by extension or
+# shebang, and takes its style from `.editorconfig`. A tracked file deleted
+# from the working tree is skipped, and a new file counts before it is added.
+#
+
+[tools]
+"aqua:editorconfig-checker/editorconfig-checker" = "4.0.2"
+"aqua:koalaman/shellcheck"                       = "0.11.0"
+"aqua:mvdan/sh"                                  = "3.14.1"
+
+[tasks."lint:shell"]
+description = "shellcheck's lint and shfmt's format check"
+run         = """
+git ls-files -z --cached --others --exclude-standard | xargs -0 -r sh -c 'for f; do [ -f "$f" ] && printf "%s\\n" "$f"; done' sh | tr '\\n' '\\0' | xargs -0 -r shfmt -f | tr '\\n' '\\0' | xargs -0 -r shellcheck --
+git ls-files -z --cached --others --exclude-standard | xargs -0 -r sh -c 'for f; do [ -f "$f" ] && printf "%s\\n" "$f"; done' sh | tr '\\n' '\\0' | xargs -0 -r shfmt -f | tr '\\n' '\\0' | xargs -0 -r shfmt --diff --
+"""
+
+[tasks."lint:systemd"]
+description = "systemd-analyze's check of the units"
+# `ExecStart=` names the script under `%h/.local/bin`, which systemd-analyze
+# requires to exist, so it is installed under a throwaway `HOME` first.
+run         = """
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+install -Dm755 cloudflare-ddns "$tmp/.local/bin/cloudflare-ddns"
+git ls-files -z -- '*.service' '*.timer' | HOME=$tmp xargs -0 -r systemd-analyze --recursive-errors=no --man=no verify --
+"""
+
+[tasks."lint:editorconfig"]
+description = "Every file against `.editorconfig`, except indent size, as CI checks"
+run         = "editorconfig-checker -disable-indent-size"
+
+[tasks."format:shell"]
+description = "Apply shfmt's formatting"
+run         = "git ls-files -z --cached --others --exclude-standard | xargs -0 -r sh -c 'for f; do [ -f \"$f\" ] && printf \"%s\\n\" \"$f\"; done' sh | tr '\\n' '\\0' | xargs -0 -r shfmt -f | tr '\\n' '\\0' | xargs -0 -r shfmt --write --"
+
+[tasks."pre-commit:shell"]
+description = "shellcheck's lint and shfmt's format check on staged files"
+run         = """
+git diff -z --cached --name-only --diff-filter=ACMR | xargs -0 -r shfmt -f | tr '\\n' '\\0' | xargs -0 -r shellcheck --
+git diff -z --cached --name-only --diff-filter=ACMR | xargs -0 -r shfmt -f | tr '\\n' '\\0' | xargs -0 -r shfmt --diff --
+"""
+
+[tasks."pre-commit:systemd"]
+description = "systemd-analyze's check of the units, when they or the script are staged"
+run         = """
+git diff --cached --quiet --diff-filter=ACMR -- '*.service' '*.timer' cloudflare-ddns && exit 0
+mise run lint:systemd
+"""
