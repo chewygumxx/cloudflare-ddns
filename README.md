@@ -40,13 +40,17 @@ running in the background.
 1. Resolve the machine's public IPv4 address via Cloudflare's own
    `cdn-cgi/trace` endpoint, forced over IPv4 so dual-stack hosts always
    compare against the address that actually matters for an `A` record.
-2. Fetch the `content` currently set on the target record via the
-   [Cloudflare API v4][cf-api].
-3. If the two addresses already match, exit `0` immediately, no write,
-   no API quota spent.
-4. Otherwise, `PATCH` the record with the new `content`, the configured
-   `ttl` and `proxied` state, and a `comment` naming the script, so the
-   record's edit history in the dashboard shows what last touched it.
+2. Fetch the target record via the [Cloudflare API v4][cf-api], and stop
+   with an error if its name isn't `RECORD_NAME`, which catches a
+   `RECORD_ID` pointing at the wrong record.
+3. Compare its `content`, `ttl` and `proxied` with the public address and
+   the configured `TTL` and `PROXIED`. If all three already match, exit
+   `0` immediately, no write, no API quota spent.
+4. Otherwise, log what differs and `PATCH` those three fields, with a
+   `comment` naming the script, so the record's edit history in the
+   dashboard shows what last touched it. The configuration is the source
+   of truth: a `ttl` or `proxied` changed in the dashboard is put back on
+   the next run.
 5. curl retries transient failures (timeouts, refused connections, HTTP
    `408`, `429` and `5xx`) itself. If any step still fails (a bad token, a
    stale record ID, a network outage), the script exits non-zero, and the
@@ -118,7 +122,7 @@ It should set the following as plain shell `KEY=value` assignments:
 | `RECORD_ID`   | yes      | -       | ID of the _existing_ `A` record to update                            |
 | `TTL`         | no       | `300`   | Seconds; forced to `1` ("Automatic") by Cloudflare if `PROXIED=true` |
 | `PROXIED`     | no       | `false` | Literal `true`/`false`, parsed as JSON, not a general shell boolean  |
-| `DEBUG`       | no       | `0`     | Set to `1` to log when the IP already matches                        |
+| `DEBUG`       | no       | `0`     | Set to `1` to log when the record is already in sync                 |
 
 ### Getting the IDs and token
 
@@ -205,9 +209,10 @@ nothing to do.
   records are written; there's no `AAAA`/IPv6 support.
 - Updates a single, pre-existing record per instance; it never creates a
   record, so the record must exist before the first run.
-- `PROXIED` and `TTL` are passed straight through to the API as JSON, so
-  `PROXIED` must be exactly `true` or `false`, and if it's `true`,
-  Cloudflare forces `TTL` to `1` regardless of what's configured.
+- `PROXIED` must be exactly `true` or `false` and `TTL` a whole number of
+  seconds; the script refuses to run otherwise. If `PROXIED` is `true`,
+  Cloudflare forces `TTL` to `1` regardless of what's configured, and the
+  script expects that.
 
 ## CI
 
