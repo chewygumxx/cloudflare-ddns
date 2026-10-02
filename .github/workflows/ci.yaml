@@ -1,0 +1,117 @@
+# vim:set expandtab shiftwidth=2 filetype=yaml foldlevel=3:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.github/workflows/ci.yaml
+#
+#
+
+# The shared standard checks (header sync, generic lint and format, metadata
+# sync), then this repository's own: commitlint and `mise run check`, the
+# latter against the commit the header sync pushed. See chewygumxx/.github
+# for each shared part.
+#
+# The shared commitlint and YAML checks need Bun, which this repository does
+# not have, so they are off in `standard` and done here with the tools mise
+# pins. The commit ranges are the shared commitlint job's.
+#
+# workflow_dispatch re-runs the metadata sync once the METADATA_APP_* secret
+# and variable are corrected.
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: read
+
+# Not cancelled in progress: a newer run must not interrupt the header sync
+# part-way through its commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  standard:
+    uses: chewygumxx/.github/.github/workflows/standard.yaml@v1
+    with:
+      metadata-client-id: ${{ vars.METADATA_APP_CLIENT_ID }}
+      commitlint: false
+      yaml: false
+    secrets:
+      metadata-private-key: ${{ secrets.METADATA_APP_PRIVATE_KEY }}
+
+  commitlint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup mise
+        uses: jdx/mise-action@v4
+        with:
+          install_args: aqua:crate-ci/committed
+
+      - name: Lint Pull Request Commits
+        if: github.event_name == 'pull_request'
+        env:
+          FROM: ${{ github.event.pull_request.base.sha }}
+          TO: ${{ github.event.pull_request.head.sha }}
+        run: mise run --skip-tools commitlint -- "$FROM..$TO"
+
+      # `before` is all zeros when the push creates the branch, and
+      # absent on workflow_dispatch; lint only the tip in those cases.
+      - name: Lint Pushed Commits
+        if: github.event_name == 'push' && !startsWith(github.event.before, '0000000')
+        env:
+          FROM: ${{ github.event.before }}
+          TO: ${{ github.sha }}
+        run: mise run --skip-tools commitlint -- "$FROM..$TO"
+
+      - name: Lint Latest Commit
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.event.before, '0000000'))
+        run: mise run --skip-tools commitlint -- -1 HEAD
+
+  check:
+    needs: standard
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.standard.outputs.sha }}
+          persist-credentials: false
+
+      # System packages a template's tools need and mise does not
+      # provide, one per line.
+      - name: Install System Packages
+        run: |
+          if [ -f .github/apt-packages.txt ]; then
+              sudo apt-get update
+              xargs -a .github/apt-packages.txt sudo apt-get install --yes --no-install-recommends
+          fi
+
+      - name: Setup mise
+        uses: jdx/mise-action@v4
+
+      - name: Check
+        run: mise run check
