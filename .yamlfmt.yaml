@@ -1,0 +1,25 @@
+# vim:set expandtab shiftwidth=2 filetype=yaml foldlevel=3:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.yamlfmt.yaml
+#
+#
+
+# https://github.com/google/yamlfmt/blob/main/docs/config-file.md
+#
+# The layout a Bun repository gets from prettier, as nearly as yamlfmt
+# allows: sequences indented under their key, comments one space from their
+# content, blank lines kept. The indent is two, not prettier's four: inside a
+# sequence item yamlfmt indents by two whatever it is told, and yamllint's
+# `indentation` rule, which the house style keeps at `consistent`, rejects a
+# file that mixes the two. `.editorconfig` says so for YAML.
+
+formatter:
+  type: basic
+  indent: 2
+  retain_line_breaks_single: true
+  pad_line_comments: 1
+  scan_folded_as_literal: true

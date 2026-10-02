@@ -1,0 +1,41 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+#:schema https://www.schemastore.org/rumdl.json
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.rumdl.toml
+#
+#
+
+# https://rumdl.dev/global-settings/
+#
+# `@chewygumxx/remark-preset` as nearly as rumdl allows: 80 columns, `-`
+# bullets, and the same consistency and recommended rules. A front matter
+# block is skipped by rumdl, and GitHub's alerts (`> [!NOTE]`) are not
+# reported as undefined references (MD052, which needs `shortcut-syntax` to
+# see `[text]` alone as a reference). Two of rumdl's rules go beyond the preset
+# and are off: a front matter `title` is not a second top-level heading (MD025),
+# and a file need not open with a heading (MD041), which the pull request
+# template does not.
+
+[global]
+line-length = 80
+
+[MD004]
+style = "dash"
+
+[MD013]
+line-length = 80
+code-blocks = false
+tables      = false
+
+[MD025]
+front-matter-title = ""
+
+[MD041]
+enabled = false
+
+[MD052]
+shortcut-syntax = true

@@ -1,0 +1,36 @@
+# vim:set expandtab shiftwidth=2 filetype=yaml foldlevel=3:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/cloudflare-ddns.git
+# ::: :/.yamllint.yaml
+#
+#
+
+# https://yamllint.readthedocs.io/en/stable/configuration.html
+#
+# The house style of `@chewygumxx/yamllint-config`, copied here because this
+# repository has no Bun to install it from.
+#
+# yamlfmt owns layout, so only the rules that disagree with its output, or
+# with how these repositories write YAML, are relaxed from the defaults.
+
+extends: default
+
+rules:
+  # yamlfmt puts one space before a trailing comment.
+  comments:
+    min-spaces-from-content: 1
+
+  # Files open with a vim modeline and licence comment, not `---`.
+  document-start: disable
+
+  # Strings, URLs and expressions cannot be wrapped; editorconfig-checker
+  # enforces a `max_line_length` where a repository sets one.
+  line-length: disable
+
+  # `on:` is a workflow key, not a boolean. Truthy values are still
+  # reported.
+  truthy:
+    check-keys: false
