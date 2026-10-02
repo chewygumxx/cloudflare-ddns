@@ -16,6 +16,8 @@ set -euo pipefail
 __curl() {
     command curl \
         --silent \
+        --connect-timeout 10 \
+        --max-time 30 \
         --retry 3 \
         --retry-delay 2 \
         --retry-all-errors \
