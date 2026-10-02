@@ -21,6 +21,13 @@ tags:
 
 # cloudflare-ddns
 
+> [!NOTE]
+> This project is largely superseded by
+> [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/),
+> whose Cloudflare Tunnel reaches a host without a public `A` record to keep in
+> sync. The script and units still work, and are kept for hosts that need a
+> plain DNS record.
+
 A small dynamic DNS client for Cloudflare: a `bash` + `curl` + `jq` script
 that compares your public IPv4 address against an existing Cloudflare `A`
 record and `PATCH`es the record only when the two have drifted apart. It
