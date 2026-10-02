@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# vim:set expandtab:shiftwidth=4:filetype=bash:
+# vim:set expandtab shiftwidth=4 filetype=bash:
 # SPDX-License-Identifier: GPL-3.0-only
 # shellcheck source=/dev/null
 
-# 
-# 
+#
+#
 # ~chewygumxx/cloudflare-ddns.git
-# ::: :/cloudflare-ddns-update
-# 
-# 
+# ::: :/cloudflare-ddns
+#
+#
 
 set -euo pipefail
 : "${DEBUG:=0}"
@@ -33,7 +33,7 @@ __api_call() {
         -H "Authorization: Bearer $API_TOKEN" \
         -H "Content-Type: application/json" \
         "$@" |
-    jq --indent 4 -er "
+        jq --indent 4 -er "
         if   .success
         then .result${jq_filter-}
         else error( ([.errors[]?.message] | join(\"; \") | select(length > 0)) // \"unknown error\" )
@@ -56,23 +56,22 @@ source "${ENVPATH:?ENVPATH is not set}"
 current_ip="$(__curl --ipv4 "https://cloudflare.com/cdn-cgi/trace" | awk -F= '/^ip=/{print $2}')"
 dns_ip="$(__api_call .content)"
 if [[ "$current_ip" == "$dns_ip" ]]; then
-    (( DEBUG )) && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"
+    ((DEBUG)) && printf "%s\n" "[DEBUG] Current IP matches DNS IP: $current_ip"
     exit 0
 fi
 
 printf "[INFO] %s\n" "Current IP does not match DNS IP" \
     "Current IP: $current_ip" "DNS IP: $dns_ip"
 
-
 # -----------
 # Update DNS
 # -----------
 
 jq -n \
-    --arg     name    "$RECORD_NAME" \
-    --arg     content "$current_ip" \
-    --arg     comment "$(basename -- "${BASH_SOURCE[0]}")" \
-    --argjson ttl     "$TTL" \
+    --arg name "$RECORD_NAME" \
+    --arg content "$current_ip" \
+    --arg comment "$(basename -- "${BASH_SOURCE[0]}")" \
+    --argjson ttl "$TTL" \
     --argjson proxied "$PROXIED" \
     '{
         type:    "A",
