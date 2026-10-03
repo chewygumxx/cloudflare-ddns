@@ -63,7 +63,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup mise
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v5
         with:
           install_args: aqua:crate-ci/committed
 
@@ -111,7 +111,7 @@ jobs:
           fi
 
       - name: Setup mise
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v5
 
       - name: Check
         run: mise run check
